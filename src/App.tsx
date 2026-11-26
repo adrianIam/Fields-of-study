@@ -2288,9 +2288,9 @@ export default function App() {
           </h1>
           <p style={{ fontSize: 15, lineHeight: 1.6, color: '#94a3b8', maxWidth: 560, margin: 0 }}>
             A navigable map of academic disciplines across{' '}
-            <span style={{ color: '#e2e8f0', fontWeight: 500 }}>{DOMAINS.length} domains</span>{' '}
-            and over <span style={{ color: '#e2e8f0', fontWeight: 500 }}>{totalFields} specialisations</span>.{' '}
-            <span style={{ color: '#475569', fontStyle: 'italic' }}>
+            <span style={{ color: '#94a3b8', fontWeight: 500 }}>{DOMAINS.length} domains</span>{' '}
+            and over <span style={{ color: '#94a3b8', fontWeight: 500 }}>{totalFields} specialisations</span>.{' '}
+            <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>
               Note: this is not an exhaustive list — many emerging, interdisciplinary, and regional fields are not represented here.
             </span>
           </p>
@@ -2734,10 +2734,10 @@ function EmptyState({ col, domain }: { col: number; domain?: typeof DOMAINS[0] }
       }}>
         {col === 1 ? '⊛' : '⊙'}
       </div>
-      <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 15, fontWeight: 600, color: '#ffffff' }}>
+      <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 15, fontWeight: 600, color: '#e2e8f0' }}>
         {msg.heading}
       </div>
-      <div style={{ fontSize: 12, color: '#ffffff', lineHeight: 1.6, maxWidth: 220 }}>
+      <div style={{ fontSize: 12, color: '#e2e8f0', lineHeight: 1.6, maxWidth: 220 }}>
         {msg.sub}
       </div>
     </div>
