@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useRef, forwardRef } from 'react'
+import JobSearch, { buildJobIndex, type JobLocation } from './JobSearch'
 
 const SCI_PATHWAYS: Record<string, { role: string; description: string }[]> = {
   'Mathematics': [
@@ -2174,6 +2175,28 @@ export default function App() {
   const [activeSubIdx, setActiveSubIdx] = useState<number | null>(null)
   const [popup, setPopup] = useState<{ field: string; x: number; y: number } | null>(null)
   const popupRef = useRef<HTMLDivElement>(null)
+  const [jobSearchOpen, setJobSearchOpen] = useState(false)
+  const [jobTarget, setJobTarget] = useState<JobLocation | null>(null)
+  const jobFieldRef = useRef<HTMLSpanElement>(null)
+  const jobs = useMemo(() => buildJobIndex(DOMAINS, DOMAIN_PATHWAYS), [])
+
+  function navigateToJob(location: JobLocation) {
+    setJobSearchOpen(false)
+    setPopup(null)
+    setActiveDomainIdx(location.domainIdx)
+    setActiveSubIdx(location.subIdx)
+    setJobTarget(location)
+  }
+
+  useEffect(() => {
+    if (!jobTarget || !jobFieldRef.current) return
+    const element = jobFieldRef.current
+    element.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+    element.focus({ preventScroll: true })
+    const rect = element.getBoundingClientRect()
+    setPopup({ field: jobTarget.field, x: rect.left, y: rect.bottom + 8 })
+    setJobTarget(null)
+  }, [jobTarget])
 
   useEffect(() => {
     if (!popup) return
@@ -2247,6 +2270,12 @@ export default function App() {
 
       {/* Header */}
       <header style={{ position: 'relative', zIndex: 10, padding: '48px 48px 32px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+          <button type="button" aria-haspopup="dialog" onClick={() => { setPopup(null); setJobSearchOpen(true) }}
+            style={{ background: hex2rgba(col, 0.1), border: `1px solid ${hex2rgba(col, 0.4)}`, borderRadius: 8, color: '#e2e8f0', fontFamily: 'Outfit, sans-serif', fontSize: 14, fontWeight: 600, padding: '10px 16px', cursor: 'pointer' }}>
+            Search by job
+          </button>
+        </div>
         <div style={{ maxWidth: 900 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: col, boxShadow: `0 0 12px ${col}`, transition: 'all 0.4s ease' }} />
@@ -2480,6 +2509,17 @@ export default function App() {
                   return (
                     <span
                       key={i}
+                      ref={jobTarget?.fieldIdx === i && jobTarget.domainIdx === activeDomainIdx && jobTarget.subIdx === activeSubIdx ? jobFieldRef : undefined}
+                      tabIndex={hasPathways ? 0 : undefined}
+                      role={hasPathways ? 'button' : undefined}
+                      aria-expanded={hasPathways ? isActive : undefined}
+                      onKeyDown={hasPathways ? e => {
+                        if (e.key !== 'Enter' && e.key !== ' ') return
+                        e.preventDefault()
+                        if (isActive) { setPopup(null); return }
+                        const rect = e.currentTarget.getBoundingClientRect()
+                        setPopup({ field, x: rect.left, y: rect.bottom + 8 })
+                      } : undefined}
                       onClick={hasPathways ? e => {
                         e.stopPropagation()
                         if (isActive) { setPopup(null); return }
@@ -2537,6 +2577,8 @@ export default function App() {
         </div>
       </div>
 
+      {jobSearchOpen && <JobSearch jobs={jobs} onClose={() => setJobSearchOpen(false)} onNavigate={navigateToJob} />}
+
       {/* Employment Pathways Popup */}
       {popup && domain && DOMAIN_PATHWAYS[domain.id]?.[popup.field] && (
         <PathwaysPopup
@@ -2579,9 +2621,9 @@ const PathwaysPopup = forwardRef<HTMLDivElement, {
   onClose: () => void
 }>(function PathwaysPopup({ field, pathways, x, y, color, onClose }, ref) {
   const viewportWidth = window.innerWidth
-  const popupWidth = 340
-  const left = Math.min(x, viewportWidth - popupWidth - 16)
-  const top = Math.min(y, window.innerHeight - 420)
+  const popupWidth = Math.min(340, viewportWidth - 32)
+  const left = Math.max(16, Math.min(x, viewportWidth - popupWidth - 16))
+  const top = Math.max(16, Math.min(y, window.innerHeight - 420))
 
   return (
     <div
@@ -2640,7 +2682,7 @@ const PathwaysPopup = forwardRef<HTMLDivElement, {
       </div>
 
       {/* Pathways list */}
-      <div style={{ padding: '10px 0', maxHeight: 340, overflowY: 'auto' }}>
+      <div style={{ padding: '10px 0', maxHeight: 'min(340px, calc(100dvh - 115px))', overflowY: 'auto' }}>
         {pathways.map((p, i) => (
           <div
             key={i}
