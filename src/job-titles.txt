@@ -2233,9 +2233,6 @@ Newsreader
 Night Filler
 Night Watchman
 Non-Destructive Testing Technician
-Not Any
-Not Applicable
-Not Stated
 Notary
 Novelist
 Noxious Weeds and Pest Inspector
@@ -2382,7 +2379,6 @@ Payroll Clerk
 Payroll Manager
 Payroll Officer
 Pearler
-Pensioner
 People and Culture Advisor
 Performer
 Performing Artist
@@ -2748,7 +2744,6 @@ Retail Manager
 Retail Merchandiser
 Retail Sales
 Retail Supervisor
-Retired
 Returned Serviceman
 Revenue Assurance Lead
 Revenue Officer
@@ -3436,7 +3431,6 @@ Ultrasonographer
 Ultrasound Technician
 Underground Truck Operator
 Underwater Welder
-Unemployed
 Union Official
 Union Organiser
 United Nations Official
@@ -3446,7 +3440,6 @@ University Professor
 University Registrar
 University Student
 University Tutor
-Unknown
 Upholsterer
 Upholstery Cleaner
 Urban Designer
