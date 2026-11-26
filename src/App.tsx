@@ -2734,10 +2734,10 @@ function EmptyState({ col, domain }: { col: number; domain?: typeof DOMAINS[0] }
       }}>
         {col === 1 ? '⊛' : '⊙'}
       </div>
-      <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 15, fontWeight: 600, color: '#334155' }}>
+      <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 15, fontWeight: 600, color: '#ffffff' }}>
         {msg.heading}
       </div>
-      <div style={{ fontSize: 12, color: '#1e293b', lineHeight: 1.6, maxWidth: 220 }}>
+      <div style={{ fontSize: 12, color: '#ffffff', lineHeight: 1.6, maxWidth: 220 }}>
         {msg.sub}
       </div>
     </div>
