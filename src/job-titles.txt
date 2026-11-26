@@ -1309,7 +1309,6 @@ Fashion Agent
 Fashion Buyer
 Fashion Designer
 Fashion Marketing Manager
-Father
 Fellmonger
 Fellmongery Worker
 Feltmaker
@@ -1670,9 +1669,7 @@ Hot Stamp Operator
 Hotel Employee
 Hotel Proprietor
 Hotelier
-House Husband
 Housekeeper
-Housewife
 Housing Officer
 Human Resources Manager
 Human Resources Professional
@@ -2155,7 +2152,6 @@ Monumental Stonemason
 Mortgage Broker
 Mortuary Technician
 Motel Owner
-Mother
 Mothercraft Nurse
 Motivational Speaker
 Motor Assembler
@@ -2897,7 +2893,6 @@ Security Worker
 Seed Collector
 Seismologist
 Seismology Technical Officer
-Self Employed
 Senior Application Engineer
 Senior Claims Specialist
 Senior Design Associate
@@ -3130,7 +3125,6 @@ Structural Steel Erector
 Structural Steel Trades Worker
 Stud Groom
 Stud Manager
-Student
 Student Administration Officer
 Student Administrator
 Student Counsellor
@@ -3497,7 +3491,6 @@ Visual Merchandiser
 Viticulturist
 Vocalist
 Voice Over Artist
-Volunteer
 Volunteer Program Coordinator
 Wages Clerk
 Wainwright
