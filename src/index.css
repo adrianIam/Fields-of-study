@@ -2,27 +2,135 @@
 @import 'tailwindcss';
 
 :root {
-  --bg: #060612;
-  --surface: #0e0e24;
-  --surface2: #14143a;
+  color-scheme: light;
+  --bg: #f3f6fb;
+  --surface: #ffffff;
+  --surface2: #f3f6fb;
+  --text: #17233c;
+  --heading: #17233c;
+  --muted: #52647c;
+  --border: #dce4ef;
+  --border-strong: #b9c6d8;
+  --hover: #e6edff;
+  --accent: #3159cd;
+  --accent-bg: #e6edff;
+  --domain-weight: 35%;
+  --panel-radius: 10px;
+  --control-radius: 8px;
+  --panel-gap: 12px;
+  --panel-border: 1px solid var(--border);
+  --popup-shadow: 0 20px 50px rgba(23,35,60,0.16);
+  --backdrop: rgba(23,35,60,0.40);
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0b1120;
+  --surface: #101a2a;
+  --surface2: #152235;
   --text: #e2e8f0;
-  --muted: #64748b;
-  --border: rgba(255,255,255,0.07);
+  --heading: #f1f5f9;
+  --muted: #94a3b8;
+  --border: #263448;
+  --border-strong: #40536c;
+  --hover: #1b2c42;
+  --accent: #7dd3fc;
+  --accent-bg: #172e41;
+  --domain-weight: 100%;
+  --panel-radius: 7px;
+  --control-radius: 7px;
+  --panel-gap: 1px;
+  --panel-border: 1px solid var(--border);
+  --popup-shadow: 0 24px 64px rgba(0,0,0,0.55);
+  --backdrop: rgba(3,8,20,0.7);
 }
-
-* {
-  scrollbar-width: none;
-}
-*::-webkit-scrollbar {
-  display: none;
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]), :root[data-theme="system"] {
+  color-scheme: dark;
+  --bg: #0b1120;
+  --surface: #101a2a;
+  --surface2: #152235;
+  --text: #e2e8f0;
+  --heading: #f1f5f9;
+  --muted: #94a3b8;
+  --border: #263448;
+  --border-strong: #40536c;
+  --hover: #1b2c42;
+  --accent: #7dd3fc;
+  --accent-bg: #172e41;
+  --domain-weight: 100%;
+  --panel-radius: 7px;
+  --control-radius: 7px;
+  --panel-gap: 1px;
+  --panel-border: 1px solid var(--border);
+  --popup-shadow: 0 24px 64px rgba(0,0,0,0.55);
+  --backdrop: rgba(3,8,20,0.7);
+  }
 }
 
 body {
+  margin: 0;
   font-family: 'Inter', sans-serif;
   background: var(--bg);
   color: var(--text);
 }
-
-h1, h2, h3, .outfit {
-  font-family: 'Outfit', sans-serif;
+h1, h2, h3, .outfit { font-family: 'Outfit', sans-serif; }
+button, select, input { font: inherit; }
+:where(button, select, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+button:disabled { cursor: default; }
+dialog::backdrop { background: var(--backdrop); }
+.explorer-header {
+  position: relative;
+  z-index: 10;
+  padding: 24px clamp(16px, 3vw, 48px) 28px;
+  border-bottom: 1px solid var(--border);
+}
+.header-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.theme-control { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
+.theme-control select, .search-jobs-button {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--control-radius);
+  padding: 9px 12px;
+  font: 500 14px 'Outfit', sans-serif;
+  cursor: pointer;
+}
+.search-jobs-button { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); font-weight: 600; }
+.search-jobs-button:hover, .theme-control select:hover { filter: brightness(0.96); }
+.explorer-breadcrumb {
+  position: relative; z-index: 10; display: flex; flex-wrap: wrap; align-items: center;
+  min-height: 42px; padding: 10px clamp(16px, 3vw, 48px);
+  border-bottom: 1px solid var(--border); gap: 8px; font: 12px 'Outfit', sans-serif;
+  color: var(--muted);
+}
+.explorer-grid {
+  position: relative; z-index: 10; flex: 1; display: grid;
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--panel-gap); padding: 12px clamp(12px, 2vw, 24px); min-height: 0;
+}
+.explorer-panel {
+  min-width: 0; padding: 16px; background: var(--surface);
+  border: var(--panel-border); border-radius: var(--panel-radius);
+}
+.domain-panel { padding: 16px 8px; }
+.explorer-footer {
+  display: flex; flex-wrap: wrap; gap: 20px; align-items: baseline;
+  padding: 12px clamp(16px, 3vw, 48px); border-top: 1px solid var(--border);
+  color: var(--muted); font: 11px 'Outfit', sans-serif;
+}
+@media (max-width: 760px) {
+  .explorer-grid { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .explorer-header { padding-top: 16px; }
+  .header-actions { gap: 8px; margin-bottom: 16px; }
+  .explorer-footer { gap: 12px; }
 }

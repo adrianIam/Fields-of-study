@@ -2170,7 +2170,28 @@ function hex2rgba(hex: string, alpha: number) {
   return `rgba(${r},${g},${b},${alpha})`
 }
 
+type ThemePreference = 'system' | 'light' | 'dark'
+const THEME_KEY = 'fields-of-study-theme'
+
+function initialTheme(): ThemePreference {
+  try {
+    const stored = localStorage.getItem(THEME_KEY)
+    if (stored === 'light' || stored === 'dark') return stored
+  } catch { /* storage may be unavailable */ }
+  return 'system'
+}
+
+function domainInk(color: string) {
+  return `color-mix(in srgb, ${color} var(--domain-weight), var(--text))`
+}
+
 export default function App() {
+  const [theme, setTheme] = useState<ThemePreference>(initialTheme)
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    try { localStorage.setItem(THEME_KEY, theme) } catch { /* optional preference storage */ }
+  }, [theme])
+
   const [activeDomainIdx, setActiveDomainIdx] = useState<number | null>(null)
   const [activeSubIdx, setActiveSubIdx] = useState<number | null>(null)
   const [popup, setPopup] = useState<{ field: string; x: number; y: number } | null>(null)
@@ -2238,59 +2259,32 @@ export default function App() {
     setActiveSubIdx(activeSubIdx === idx ? null : idx)
   }
 
-  const col = domain?.color ?? '#38bdf8'
-
   return (
-    <div style={{ background: '#060612', minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
-      {/* Star field */}
-      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
-        <div style={{
-          position: 'absolute', inset: 0,
-          backgroundImage: [
-            'radial-gradient(1px 1px at 15% 20%, rgba(255,255,255,0.6) 0%, transparent 100%)',
-            'radial-gradient(1px 1px at 72% 8%, rgba(255,255,255,0.5) 0%, transparent 100%)',
-            'radial-gradient(1.5px 1.5px at 43% 55%, rgba(255,255,255,0.4) 0%, transparent 100%)',
-            'radial-gradient(1px 1px at 88% 32%, rgba(255,255,255,0.6) 0%, transparent 100%)',
-            'radial-gradient(1px 1px at 27% 79%, rgba(255,255,255,0.35) 0%, transparent 100%)',
-            'radial-gradient(1.5px 1.5px at 60% 88%, rgba(255,255,255,0.5) 0%, transparent 100%)',
-            'radial-gradient(1px 1px at 5% 46%, rgba(255,255,255,0.4) 0%, transparent 100%)',
-            'radial-gradient(1px 1px at 93% 71%, rgba(255,255,255,0.5) 0%, transparent 100%)',
-            'radial-gradient(1px 1px at 52% 13%, rgba(255,255,255,0.45) 0%, transparent 100%)',
-            'radial-gradient(1.5px 1.5px at 33% 37%, rgba(255,255,255,0.3) 0%, transparent 100%)',
-            'radial-gradient(1px 1px at 79% 62%, rgba(255,255,255,0.55) 0%, transparent 100%)',
-            'radial-gradient(1px 1px at 18% 93%, rgba(255,255,255,0.4) 0%, transparent 100%)',
-          ].join(', '),
-        }} />
-        {/* Nebula glow */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'radial-gradient(ellipse 60% 40% at 20% 30%, rgba(56,189,248,0.04) 0%, transparent 60%), radial-gradient(ellipse 50% 35% at 80% 70%, rgba(167,139,250,0.04) 0%, transparent 60%)',
-        }} />
-      </div>
-
+    <div className="explorer" style={{ background: 'var(--bg)', minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative' }}>
       {/* Header */}
-      <header style={{ position: 'relative', zIndex: 10, padding: '48px 48px 32px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
-          <button type="button" aria-haspopup="dialog" onClick={() => { setPopup(null); setJobSearchOpen(true) }}
-            style={{ background: hex2rgba(col, 0.1), border: `1px solid ${hex2rgba(col, 0.4)}`, borderRadius: 8, color: '#e2e8f0', fontFamily: 'Outfit, sans-serif', fontSize: 14, fontWeight: 600, padding: '10px 16px', cursor: 'pointer' }}>
+      <header className="explorer-header">
+        <div className="header-actions">
+          <label className="theme-control">
+            <span>Theme</span>
+            <select aria-label="Colour theme" value={theme} onChange={e => setTheme(e.target.value as ThemePreference)}>
+              <option value="system">System</option>
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </label>
+          <button className="search-jobs-button" type="button" aria-haspopup="dialog" onClick={() => { setPopup(null); setJobSearchOpen(true) }}>
             Search by job
           </button>
         </div>
         <div style={{ maxWidth: 900 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: col, boxShadow: `0 0 12px ${col}`, transition: 'all 0.4s ease' }} />
-            <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '0.2em', color: '#64748b', textTransform: 'uppercase' }}>
-              Knowledge Navigator
-            </span>
-          </div>
-          <h1 style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'clamp(28px, 4vw, 48px)', fontWeight: 700, lineHeight: 1.1, margin: '0 0 16px', color: '#f1f5f9' }}>
+          <h1 style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'clamp(28px, 3.6vw, 42px)', fontWeight: 700, lineHeight: 1.1, margin: '0 0 16px', color: 'var(--heading)' }}>
             Academic Fields Explorer
           </h1>
-          <p style={{ fontSize: 15, lineHeight: 1.6, color: '#94a3b8', maxWidth: 560, margin: 0 }}>
+          <p style={{ fontSize: 15, lineHeight: 1.6, color: 'var(--muted)', maxWidth: 720, margin: 0 }}>
             A navigable map of academic disciplines across{' '}
-            <span style={{ color: '#94a3b8', fontWeight: 500 }}>{DOMAINS.length} domains</span>{' '}
-            and over <span style={{ color: '#94a3b8', fontWeight: 500 }}>{totalFields} specialisations</span>.{' '}
-            <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>
+            <span style={{ color: 'var(--muted)', fontWeight: 500 }}>{DOMAINS.length} domains</span>{' '}
+            and over <span style={{ color: 'var(--muted)', fontWeight: 500 }}>{totalFields} specialisations</span>.{' '}
+            <span style={{ color: 'var(--muted)', fontStyle: 'italic' }}>
               Note: this is not an exhaustive list — many emerging, interdisciplinary, and regional fields are not represented here.
             </span>
           </p>
@@ -2298,45 +2292,32 @@ export default function App() {
       </header>
 
       {/* Breadcrumb */}
-      <div style={{ position: 'relative', zIndex: 10, height: 40, display: 'flex', alignItems: 'center', padding: '0 48px', borderBottom: '1px solid rgba(255,255,255,0.04)', gap: 8, fontSize: 12, color: '#475569', fontFamily: 'Outfit, sans-serif' }}>
-        <span style={{ color: '#334155' }}>All fields</span>
+      <div className="explorer-breadcrumb">
+        <span style={{ color: 'var(--muted)' }}>All fields</span>
         {domain && (
           <>
             <span>›</span>
-            <span style={{ color: domain.color }}>{domain.name}</span>
+            <span style={{ color: domainInk(domain.color) }}>{domain.name}</span>
           </>
         )}
         {subdomain && (
           <>
             <span>›</span>
-            <span style={{ color: '#94a3b8' }}>{subdomain.name}</span>
+            <span style={{ color: 'var(--muted)' }}>{subdomain.name}</span>
           </>
         )}
         {!domain && (
-          <span style={{ marginLeft: 8, color: '#1e293b', fontSize: 11, fontStyle: 'italic' }}>
+          <span style={{ marginLeft: 8, color: 'var(--muted)', fontSize: 11, fontStyle: 'italic' }}>
             Select a domain to begin exploring
           </span>
         )}
       </div>
 
       {/* Main 3-column explorer */}
-      <div style={{
-        position: 'relative',
-        zIndex: 10,
-        flex: 1,
-        display: 'grid',
-        gridTemplateColumns: '280px 1fr 1fr',
-        gap: 0,
-        overflow: 'hidden',
-        minHeight: 0,
-      }}>
+      <div className="explorer-grid">
         {/* Column 1: Domains */}
-        <div style={{
-          borderRight: '1px solid rgba(255,255,255,0.06)',
-          overflowY: 'auto',
-          padding: '16px 0',
-        }}>
-          <div style={{ padding: '0 16px 8px', fontSize: 10, fontWeight: 600, letterSpacing: '0.15em', color: '#334155', textTransform: 'uppercase', fontFamily: 'Outfit, sans-serif' }}>
+        <div className="explorer-panel domain-panel">
+          <div style={{ padding: '0 16px 8px', fontSize: 10, fontWeight: 600, letterSpacing: '0.15em', color: 'var(--muted)', textTransform: 'uppercase', fontFamily: 'Outfit, sans-serif' }}>
             Domains
           </div>
           {DOMAINS.map((d, i) => {
@@ -2345,32 +2326,34 @@ export default function App() {
             return (
               <button
                 key={d.id}
+                aria-expanded={isActive}
                 onClick={() => handleDomainClick(i)}
                 style={{
                   width: '100%',
                   textAlign: 'left',
                   background: isActive ? hex2rgba(d.color, 0.08) : 'transparent',
-                  border: 'none',
+                  border: `1px solid ${isActive ? hex2rgba(d.color, 0.4) : 'transparent'}`,
                   borderLeft: `3px solid ${isActive ? d.color : 'transparent'}`,
-                  padding: '10px 16px 10px 13px',
+                  borderRadius: 'var(--control-radius)',
+                  padding: '10px 12px 10px 10px',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   gap: 10,
                   transition: 'all 0.18s ease',
-                  color: isActive ? '#f1f5f9' : '#64748b',
+                  color: isActive ? 'var(--heading)' : 'var(--muted)',
                   fontFamily: 'Outfit, sans-serif',
                 }}
                 onMouseEnter={e => {
                   if (!isActive) {
-                    (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)'
-                    ;(e.currentTarget as HTMLElement).style.color = '#94a3b8'
+                    (e.currentTarget as HTMLElement).style.background = 'var(--surface2)'
+                    ;(e.currentTarget as HTMLElement).style.color = 'var(--muted)'
                   }
                 }}
                 onMouseLeave={e => {
                   if (!isActive) {
                     (e.currentTarget as HTMLElement).style.background = 'transparent'
-                    ;(e.currentTarget as HTMLElement).style.color = '#64748b'
+                    ;(e.currentTarget as HTMLElement).style.color = 'var(--muted)'
                   }
                 }}
               >
@@ -2379,8 +2362,8 @@ export default function App() {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   borderRadius: 6,
                   fontSize: 14,
-                  background: isActive ? hex2rgba(d.color, 0.15) : 'rgba(255,255,255,0.04)',
-                  color: isActive ? d.color : '#475569',
+                  background: isActive ? hex2rgba(d.color, 0.15) : 'var(--surface2)',
+                  color: domainInk(d.color),
                   flexShrink: 0,
                   transition: 'all 0.18s ease',
                 }}>
@@ -2391,8 +2374,8 @@ export default function App() {
                 </span>
                 <span style={{
                   fontSize: 10, fontWeight: 600,
-                  color: isActive ? d.color : '#1e293b',
-                  background: isActive ? hex2rgba(d.color, 0.12) : 'rgba(255,255,255,0.04)',
+                  color: isActive ? domainInk(d.color) : 'var(--muted)',
+                  background: isActive ? hex2rgba(d.color, 0.12) : 'var(--surface2)',
                   padding: '2px 6px', borderRadius: 4,
                   transition: 'all 0.18s ease',
                   flexShrink: 0,
@@ -2405,17 +2388,12 @@ export default function App() {
         </div>
 
         {/* Column 2: Sub-domains */}
-        <div style={{
-          borderRight: '1px solid rgba(255,255,255,0.06)',
-          overflowY: 'auto',
-          padding: '16px',
-          position: 'relative',
-        }}>
+        <div className="explorer-panel">
           {domain ? (
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-                <div style={{ width: 6, height: 6, borderRadius: '50%', background: domain.color, boxShadow: `0 0 8px ${domain.color}` }} />
-                <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.15em', color: domain.color, textTransform: 'uppercase', opacity: 0.8 }}>
+                <div style={{ width: 6, height: 6, borderRadius: '50%', background: domain.color, boxShadow: 'none' }} />
+                <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.15em', color: domainInk(domain.color), textTransform: 'uppercase', opacity: 1 }}>
                   {domain.subdomains.length} sub-domains
                 </span>
               </div>
@@ -2425,11 +2403,12 @@ export default function App() {
                   return (
                     <button
                       key={i}
+                      aria-expanded={isActive}
                       onClick={() => handleSubClick(i)}
                       style={{
                         textAlign: 'left',
-                        background: isActive ? hex2rgba(domain.color, 0.1) : 'rgba(255,255,255,0.03)',
-                        border: `1px solid ${isActive ? hex2rgba(domain.color, 0.4) : 'rgba(255,255,255,0.06)'}`,
+                        background: isActive ? hex2rgba(domain.color, 0.1) : 'var(--surface2)',
+                        border: `1px solid ${isActive ? hex2rgba(domain.color, 0.4) : 'var(--border)'}`,
                         borderRadius: 10,
                         padding: '12px 14px',
                         cursor: 'pointer',
@@ -2438,21 +2417,21 @@ export default function App() {
                         justifyContent: 'space-between',
                         gap: 12,
                         transition: 'all 0.18s ease',
-                        color: isActive ? '#f1f5f9' : '#94a3b8',
+                        color: isActive ? 'var(--heading)' : 'var(--muted)',
                         fontFamily: 'Outfit, sans-serif',
                       }}
                       onMouseEnter={e => {
                         if (!isActive) {
-                          (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)'
-                          ;(e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.1)'
-                          ;(e.currentTarget as HTMLElement).style.color = '#e2e8f0'
+                          (e.currentTarget as HTMLElement).style.background = 'var(--hover)'
+                          ;(e.currentTarget as HTMLElement).style.borderColor = 'var(--border-strong)'
+                          ;(e.currentTarget as HTMLElement).style.color = 'var(--text)'
                         }
                       }}
                       onMouseLeave={e => {
                         if (!isActive) {
-                          (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)'
-                          ;(e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.06)'
-                          ;(e.currentTarget as HTMLElement).style.color = '#94a3b8'
+                          (e.currentTarget as HTMLElement).style.background = 'var(--surface2)'
+                          ;(e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'
+                          ;(e.currentTarget as HTMLElement).style.color = 'var(--muted)'
                         }
                       }}
                     >
@@ -2460,15 +2439,15 @@ export default function App() {
                         <div style={{ fontSize: 13, fontWeight: isActive ? 600 : 400, lineHeight: 1.3, marginBottom: 3 }}>
                           {sd.name}
                         </div>
-                        <div style={{ fontSize: 11, color: '#475569' }}>
+                        <div style={{ fontSize: 11, color: 'var(--muted)' }}>
                           {sd.fields.length} {sd.fields.length === 1 ? 'field' : 'fields'}
                         </div>
                       </div>
                       <div style={{
                         width: 24, height: 24, borderRadius: '50%',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        background: isActive ? hex2rgba(domain.color, 0.2) : 'rgba(255,255,255,0.04)',
-                        color: isActive ? domain.color : '#334155',
+                        background: isActive ? hex2rgba(domain.color, 0.2) : 'var(--surface2)',
+                        color: isActive ? domainInk(domain.color) : 'var(--muted)',
                         fontSize: 14,
                         transition: 'all 0.18s ease',
                         flexShrink: 0,
@@ -2486,19 +2465,16 @@ export default function App() {
         </div>
 
         {/* Column 3: Fields */}
-        <div style={{
-          overflowY: 'auto',
-          padding: '16px',
-        }}>
+        <div className="explorer-panel">
           {subdomain && domain ? (
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-                <div style={{ width: 6, height: 6, borderRadius: '50%', background: domain.color, boxShadow: `0 0 8px ${domain.color}` }} />
-                <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.15em', color: domain.color, textTransform: 'uppercase', opacity: 0.8 }}>
+                <div style={{ width: 6, height: 6, borderRadius: '50%', background: domain.color, boxShadow: 'none' }} />
+                <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.15em', color: domainInk(domain.color), textTransform: 'uppercase', opacity: 1 }}>
                   {subdomain.fields.length} specialisations
                 </span>
               </div>
-              <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 16, fontWeight: 600, color: '#f1f5f9', marginBottom: 16, lineHeight: 1.3 }}>
+              <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 16, fontWeight: 600, color: 'var(--heading)', marginBottom: 16, lineHeight: 1.3 }}>
                 {subdomain.name}
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -2533,28 +2509,28 @@ export default function App() {
                         fontWeight: 500,
                         background: isActive ? hex2rgba(domain.color, 0.18) : hex2rgba(domain.color, 0.08),
                         border: `1px solid ${isActive ? hex2rgba(domain.color, 0.5) : hex2rgba(domain.color, 0.2)}`,
-                        color: isActive ? '#f1f5f9' : '#cbd5e1',
+                        color: isActive ? 'var(--heading)' : 'var(--text)',
                         transition: 'all 0.15s ease',
                         cursor: hasPathways ? 'pointer' : 'default',
                         display: 'inline-flex',
                         alignItems: 'center',
                         gap: 6,
-                        boxShadow: isActive ? `0 0 16px ${hex2rgba(domain.color, 0.2)}` : 'none',
+                        boxShadow: 'none',
                         userSelect: 'none',
                       }}
                       onMouseEnter={e => {
                         if (!isActive) {
                           (e.currentTarget as HTMLElement).style.background = hex2rgba(domain.color, 0.16)
                           ;(e.currentTarget as HTMLElement).style.borderColor = hex2rgba(domain.color, 0.4)
-                          ;(e.currentTarget as HTMLElement).style.color = '#f1f5f9'
-                          ;(e.currentTarget as HTMLElement).style.boxShadow = `0 0 12px ${hex2rgba(domain.color, 0.15)}`
+                          ;(e.currentTarget as HTMLElement).style.color = 'var(--heading)'
+                          ;(e.currentTarget as HTMLElement).style.boxShadow = 'none'
                         }
                       }}
                       onMouseLeave={e => {
                         if (!isActive) {
                           (e.currentTarget as HTMLElement).style.background = hex2rgba(domain.color, 0.08)
                           ;(e.currentTarget as HTMLElement).style.borderColor = hex2rgba(domain.color, 0.2)
-                          ;(e.currentTarget as HTMLElement).style.color = '#cbd5e1'
+                          ;(e.currentTarget as HTMLElement).style.color = 'var(--text)'
                           ;(e.currentTarget as HTMLElement).style.boxShadow = 'none'
                         }
                       }}
@@ -2593,18 +2569,18 @@ export default function App() {
       )}
 
       {/* Footer stat bar */}
-      <div style={{ position: 'relative', zIndex: 10, borderTop: '1px solid rgba(255,255,255,0.04)', padding: '12px 48px', display: 'flex', gap: 32, fontSize: 11, color: '#334155', fontFamily: 'Outfit, sans-serif' }}>
+      <div className="explorer-footer">
         {[
           { label: 'Domains', value: DOMAINS.length },
           { label: 'Sub-domains', value: DOMAINS.reduce((s, d) => s + d.subdomains.length, 0) },
           { label: 'Specialisations', value: totalFields },
         ].map(stat => (
           <div key={stat.label} style={{ display: 'flex', gap: 6, alignItems: 'baseline' }}>
-            <span style={{ fontSize: 14, fontWeight: 600, color: '#475569' }}>{stat.value}</span>
+            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--muted)' }}>{stat.value}</span>
             <span>{stat.label}</span>
           </div>
         ))}
-        <span style={{ marginLeft: 'auto', fontStyle: 'italic', color: '#1e293b' }}>
+        <span style={{ marginLeft: 'auto', fontStyle: 'italic', color: 'var(--muted)' }}>
           Source: Australian Standard Classification of Education (ASCED)
         </span>
       </div>
@@ -2634,17 +2610,17 @@ const PathwaysPopup = forwardRef<HTMLDivElement, {
         top,
         width: popupWidth,
         zIndex: 100,
-        background: '#0d0d28',
+        background: 'var(--surface)',
         border: `1px solid ${hex2rgba(color, 0.3)}`,
         borderRadius: 14,
-        boxShadow: `0 24px 64px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04), 0 0 40px ${hex2rgba(color, 0.08)}`,
+        boxShadow: 'var(--popup-shadow)',
         overflow: 'hidden',
       }}
     >
       {/* Header */}
       <div style={{
         padding: '14px 16px 12px',
-        borderBottom: `1px solid rgba(255,255,255,0.06)`,
+        borderBottom: '1px solid var(--border)',
         display: 'flex',
         alignItems: 'flex-start',
         justifyContent: 'space-between',
@@ -2652,20 +2628,22 @@ const PathwaysPopup = forwardRef<HTMLDivElement, {
         background: hex2rgba(color, 0.05),
       }}>
         <div>
-          <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.15em', color, textTransform: 'uppercase', marginBottom: 4, opacity: 0.8 }}>
+          <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.15em', color: domainInk(color), textTransform: 'uppercase', marginBottom: 4, opacity: 1 }}>
             Employment Pathways
           </div>
-          <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 15, fontWeight: 700, color: '#f1f5f9', lineHeight: 1.2 }}>
+          <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 15, fontWeight: 700, color: 'var(--heading)', lineHeight: 1.2 }}>
             {field}
           </div>
         </div>
         <button
+          type="button"
+          aria-label="Close employment pathways"
           onClick={onClose}
           style={{
-            background: 'rgba(255,255,255,0.05)',
-            border: '1px solid rgba(255,255,255,0.08)',
+            background: 'var(--hover)',
+            border: '1px solid var(--border)',
             borderRadius: 6,
-            color: '#64748b',
+            color: 'var(--muted)',
             cursor: 'pointer',
             fontSize: 14,
             width: 24,
@@ -2688,7 +2666,7 @@ const PathwaysPopup = forwardRef<HTMLDivElement, {
             key={i}
             style={{
               padding: '10px 16px',
-              borderBottom: i < pathways.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
+              borderBottom: i < pathways.length - 1 ? '1px solid var(--border)' : 'none',
               display: 'flex',
               gap: 12,
               alignItems: 'flex-start',
@@ -2697,15 +2675,15 @@ const PathwaysPopup = forwardRef<HTMLDivElement, {
             <div style={{
               width: 6, height: 6, borderRadius: '50%',
               background: color,
-              boxShadow: `0 0 6px ${hex2rgba(color, 0.6)}`,
+              boxShadow: 'none',
               flexShrink: 0,
               marginTop: 5,
             }} />
             <div>
-              <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 13, fontWeight: 600, color: '#e2e8f0', marginBottom: 3 }}>
+              <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 3 }}>
                 {p.role}
               </div>
-              <div style={{ fontSize: 11.5, color: '#64748b', lineHeight: 1.55 }}>
+              <div style={{ fontSize: 11.5, color: 'var(--muted)', lineHeight: 1.55 }}>
                 {p.description}
               </div>
             </div>
@@ -2726,18 +2704,18 @@ function EmptyState({ col, domain }: { col: number; domain?: typeof DOMAINS[0] }
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: 240, gap: 12, textAlign: 'center', padding: 32 }}>
       <div style={{
         width: 48, height: 48, borderRadius: '50%',
-        border: '1px solid rgba(255,255,255,0.07)',
+        border: '1px solid var(--border)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 20, color: '#1e293b',
-        background: 'rgba(255,255,255,0.02)',
+        fontSize: 20, color: 'var(--muted)',
+        background: 'var(--surface2)',
         marginBottom: 4,
       }}>
         {col === 1 ? '⊛' : '⊙'}
       </div>
-      <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 15, fontWeight: 600, color: '#e2e8f0' }}>
+      <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>
         {msg.heading}
       </div>
-      <div style={{ fontSize: 12, color: '#e2e8f0', lineHeight: 1.6, maxWidth: 220 }}>
+      <div style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.6, maxWidth: 220 }}>
         {msg.sub}
       </div>
     </div>
